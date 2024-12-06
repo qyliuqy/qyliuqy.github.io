@@ -1,0 +1,821 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.29.1" theme-name="Stellar" theme-version="1.29.1">
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel="preconnect" href="https://gcore.jsdelivr.net" crossorigin><link rel="preconnect" href="https://unpkg.com" crossorigin><link rel="preconnect" href="https://cdn.bootcdn.net" crossorigin>
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  
+  <title></title>
+
+  
+    <meta name="description" content="saltstack 自动化运维工具saltstack 官网 SaltStack采用C&#x2F;S模式，server端就是salt的master，client端就是minion，minion与master之间通过ZeroMQ消息队列通信minion上线后先与master端联系，把自己的pub key发过去，这时master端通过salt-key –L命令就会看到minion的key，接受该mini">
+<meta property="og:type" content="article">
+<meta property="og:title">
+<meta property="og:url" content="http://lqy672.com/2024/12/06/Saltstack%E8%AE%B0%E5%BD%95/index.html">
+<meta property="og:site_name">
+<meta property="og:description" content="saltstack 自动化运维工具saltstack 官网 SaltStack采用C&#x2F;S模式，server端就是salt的master，client端就是minion，minion与master之间通过ZeroMQ消息队列通信minion上线后先与master端联系，把自己的pub key发过去，这时master端通过salt-key –L命令就会看到minion的key，接受该mini">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-12-06T14:37:02.263Z">
+<meta property="article:modified_time" content="2023-09-07T10:04:51.028Z">
+<meta property="article:author" content="Liuqy">
+<meta name="twitter:card" content="summary">
+  
+  
+  
+  
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.29.1">
+
+  
+
+  
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/xaoxuu/favicon/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/xaoxuu/favicon/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/xaoxuu/favicon/favicon-16x16.png"><link rel="manifest" href="/assets/xaoxuu/favicon/site.webmanifest"><link rel="shortcut icon" href="/assets/xaoxuu/favicon/favicon.ico"><meta name="theme-color" content="#f8f8f8"><link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/lxgw-wenkai-screen-webfont/1.7.0/style.min.css" media="all" />
+</head>
+<body>
+
+<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><div class="icon"><img no-lazy class="icon" src="/assets/icon.svg" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></div><a class="title" href="/"><div class="main" ff="title">Liuqy</div><div class="sub normal cap">个人博客</div><div class="sub hover cap" style="opacity:0"> Designed by Liuqy</div></a></div></header>
+
+<div class="nav-area">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="专栏" href="/topic/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="探索" href="/explore/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="社交" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
+</div>
+<div class="widgets">
+
+
+<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2024-12-06T14:37:02.263Z">2024-12-06</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2023-09-07T10:04:51.028Z">2023-09-07</time></span></div></div></div>
+    
+  </div>
+  </div><article class="md-text content"><h2 id="saltstack-自动化运维工具"><a href="#saltstack-自动化运维工具" class="headerlink" title="saltstack 自动化运维工具"></a>saltstack 自动化运维工具</h2><p><a target="_blank" rel="noopener" href="http://docs.saltstack.cn/">saltstack 官网</a></p>
+<p>SaltStack采用C&#x2F;S模式，server端就是salt的master，client端就是minion，minion与master之间通过ZeroMQ消息队列通信minion上线后先与master端联系，把自己的pub key发过去，这时master端通过salt-key –L命令就会看到minion的key，接受该minion-key后，也就是master与minion已经互信master可以发送任何指令让minion执行了，salt有很多可执行模块，比如说cmd模块，在安装minion的时候已经自带了，它们通常位于你的python库中</p>
+<ul>
+<li>基于python开发的C&#x2F;S架构配置管理工具</li>
+<li>底层使用ZeroMQ消息队列pub&#x2F;sub方式通信</li>
+<li>使用SSL证书签发的方式进行认证管理，传输采用AES加密</li>
+</ul>
+<p>master端口：4505</p>
+<p>minion端口：4506</p>
+<h2 id="SaltStack组件介绍"><a href="#SaltStack组件介绍" class="headerlink" title="SaltStack组件介绍"></a>SaltStack组件介绍</h2><table>
+<thead>
+<tr>
+<th>组件</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Salt Master</td>
+<td>用于将命令和配置发送到在受管系统上运行的Salt minion</td>
+</tr>
+<tr>
+<td>Salt Minions</td>
+<td>从Salt master接收命令和配置</td>
+</tr>
+<tr>
+<td>Execution Modules</td>
+<td>从命令行针对一个或多个受管系统执行的临时命令。对…有用： 1. 实时监控，状态和库存 2. 一次性命令和脚本 3. 部署关键更新</td>
+</tr>
+<tr>
+<td>Formulas (States)</td>
+<td>系统配置的声明性或命令式表示</td>
+</tr>
+<tr>
+<td>Grains</td>
+<td>Grains是有关底层受管系统的静态信息，包括操作系统，内存和许多其他系统属性</td>
+</tr>
+<tr>
+<td>Pillar</td>
+<td>用户定义的变量。这些安全变量被定义并存储在Salt Master中， 然后使用目标“分配”给一个或多个Minion。 Pillar数据存储诸如端口，文件路径，配置参数和密码之类的值</td>
+</tr>
+<tr>
+<td>Top File</td>
+<td>将Formulas (States)和Salt Pillar数据与Salt minions匹配</td>
+</tr>
+<tr>
+<td>Runners</td>
+<td>在Salt master上执行的模块，用于执行支持任务。Salt runners报告作业状态，连接状态，从外部API读取数据，查询连接的Salt minions等</td>
+</tr>
+<tr>
+<td>Returners</td>
+<td>将Salt minions返回的数据发送到另一个系统，例如数据库。Salt Returners可以在Salt minion或Salt master上运行</td>
+</tr>
+<tr>
+<td>Reactor</td>
+<td>在SaltStack环境中发生事件时触发反应</td>
+</tr>
+<tr>
+<td>Salt Cloud &#x2F; Salt Virt</td>
+<td>在云提供商&#x2F;虚拟机管理程序上提供系统，并立即将其置于管理之下</td>
+</tr>
+<tr>
+<td>Salt SSH</td>
+<td>在没有Salt minion的系统上通过SSH运行Salt命令</td>
+</tr>
+</tbody></table>
+<h2 id="SaltStack部署"><a href="#SaltStack部署" class="headerlink" title="SaltStack部署"></a>SaltStack部署</h2><p>部署规划</p>
+<table>
+<thead>
+<tr>
+<th>host</th>
+<th>IP</th>
+<th>role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>k8s-master01</td>
+<td>192.168.100.100</td>
+<td>master</td>
+</tr>
+<tr>
+<td>k8s-node01</td>
+<td>192.168.100.101</td>
+<td>minion</td>
+</tr>
+</tbody></table>
+<p>环境准备<br>实验的机器分别对hosts文件进行修改。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@node-01 ~]# cat /etc/hosts</span><br><span class="line">127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4</span><br><span class="line">::1         localhost localhost.localdomain localhost6 localhost6.localdomain6</span><br><span class="line">192.168.100.100 k8s-master01</span><br><span class="line">192.168.100.101 k8s-node01</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>添加SaltStack源<br>分别对机器添加源。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo rpm --import https://repo.saltproject.io/py3/redhat/7/x86_64/latest/SALTSTACK-GPG-KEY.pub</span><br><span class="line">curl -fsSL https://repo.saltproject.io/py3/redhat/7/x86_64/latest.repo | sudo tee /etc/yum.repos.d/salt.repo</span><br></pre></td></tr></table></figure>
+
+<p>安装SaltStack<br>node-01执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install salt-master salt-minion</span><br></pre></td></tr></table></figure>
+
+<p>node-02、node-03执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install salt-minion</span><br></pre></td></tr></table></figure>
+
+<p>配置SaltStack</p>
+<p>master 修改 &#x2F;etc&#x2F;salt&#x2F;master</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># egrep -v &#x27;^#|^$&#x27; /etc/salt/master</span><br><span class="line">interface: 192.168.100.100</span><br><span class="line"></span><br><span class="line">#systemctl restart salt-master</span><br><span class="line">#systemctl enables salt-minion</span><br></pre></td></tr></table></figure>
+
+<p>minion 修改 &#x2F;etc&#x2F;salt&#x2F;minion</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># egrep -v &#x27;^#|^$&#x27; /etc/salt/minion</span><br><span class="line">master: 192.168.100.100</span><br><span class="line"></span><br><span class="line">#systemctl restart salt-minion</span><br><span class="line">#systemctl enables salt-minion</span><br></pre></td></tr></table></figure>
+
+<p>列出master上的密钥及认证</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master01 ~]#  salt-key -a k8s-node01</span><br><span class="line">The following keys are going to be accepted:</span><br><span class="line">Unaccepted Keys:</span><br><span class="line">k8s-node01</span><br><span class="line">Proceed? [n/Y] y</span><br><span class="line">Key for minion k8s-node01 accepted.</span><br><span class="line">[root@k8s-master01 ~]#  salt-key </span><br><span class="line">Accepted Keys:</span><br><span class="line">k8s-node01</span><br><span class="line">Denied Keys:</span><br><span class="line">Unaccepted Keys:</span><br><span class="line">Rejected Keys:</span><br></pre></td></tr></table></figure>
+
+<p>验证存活主机</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#  salt &#x27;*&#x27; test.ping</span><br><span class="line">k8s-node01:</span><br><span class="line">    True</span><br></pre></td></tr></table></figure>
+
+<h2 id="salt常用命令"><a href="#salt常用命令" class="headerlink" title="salt常用命令"></a>salt常用命令</h2><ol>
+<li><p>salt 该命令执行salt的执行模块，通常在master端运行，也是我们最常用到的命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">salt [options] &#x27;&lt;target&gt;&#x27; &lt;function&gt; [arguments]</span><br><span class="line">如: salt &#x27;*&#x27; test.ping</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>salt-run 该命令执行runner(salt带的或者自定义的，runner以后会讲)，通常在master端执行，比如经常用到的manage</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">salt-run [options] [runner.func]</span><br><span class="line">salt-run manage.status   #查看所有minion状态</span><br><span class="line">salt-run manage.down     #查看所有没在线minion</span><br><span class="line">salt-run manged.up       #查看所有在线minion</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>salt-key 密钥管理，通常在master端执行</p>
+<blockquote>
+<p>在master端&#x2F;etc&#x2F;salt&#x2F;master配置auto_accept: True   #如果对Minion信任,可以配置master自动接受请求</p>
+</blockquote>
+<figure class="highlight vbnet"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">salt-<span class="keyword">key</span> [options]</span><br><span class="line">salt-<span class="keyword">key</span> -L              #查看所有minion-<span class="keyword">key</span></span><br><span class="line">salt-<span class="keyword">key</span> -a &lt;<span class="keyword">key</span>-name&gt;   #接受某个minion-<span class="keyword">key</span></span><br><span class="line">salt-<span class="keyword">key</span> -d &lt;<span class="keyword">key</span>-name&gt;   #删除某个minion-<span class="keyword">key</span></span><br><span class="line">salt-<span class="keyword">key</span> -r &lt;<span class="keyword">key</span>-name&gt;   #注销掉指定<span class="keyword">key</span>（该状态为未被认证）</span><br><span class="line">salt-<span class="keyword">key</span> -A              #接受所有的minion-<span class="keyword">key</span></span><br><span class="line">salt-<span class="keyword">key</span> -D              #删除所有的minion-<span class="keyword">key</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>salt-call 该命令通常在minion上执行，minion自己执行可执行模块，不是通过master下发job</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">salt-call [options] &lt;function&gt; [arguments]</span><br><span class="line">salt-call test.ping           ##自己执行test.ping命令</span><br><span class="line">salt-call cmd.run &#x27;ifconfig&#x27;  ##自己执行cmd.run函数</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>salt-cp 分发文件到minion上,不支持目录分发，通常在master运行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">salt-cp [options] &#x27;&lt;target&gt;&#x27; SOURCE DEST</span><br><span class="line">salt-cp &#x27;*&#x27; testfile.html /tmp</span><br><span class="line">salt-cp &#x27;test*&#x27; index.html /tmp/a.html</span><br><span class="line">      </span><br><span class="line">[root@k8s-master01 ~]# salt-cp -N test1  nginx.yaml /tmp</span><br><span class="line">k8s-node01:</span><br><span class="line">    ----------</span><br><span class="line">    /tmp/nginx.yaml:</span><br><span class="line">        True</span><br><span class="line">[root@k8s-master01 ~]# salt -N test1  cmd.run &#x27;ls -l  /tmp&#x27;</span><br><span class="line">k8s-node01:</span><br><span class="line">    total 4</span><br><span class="line">    -rw-r--r-- 1 root root 530 Jul  5 14:10 nginx.yaml</span><br><span class="line">    drwx------ 2 root root   6 Jun 30 22:12 vmware-root_702-2722304542</span><br><span class="line">    drwx------ 2 root root   6 Jun 30 21:51 vmware-root_705-4256479617</span><br><span class="line">    drwx------ 2 root root   6 Jul  4 19:12 vmware-root_709-4248287236</span><br><span class="line">    drwx------ 2 root root   6 Jun 30 21:48 vmware-root_740-2999460834</span><br><span class="line">[root@k8s-master01 ~]# </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="salt主机分组管理"><a href="#salt主机分组管理" class="headerlink" title="salt主机分组管理"></a>salt主机分组管理</h2></li>
+</ol>
+<blockquote>
+<p> nodegroups 其实就是对Minion分组</p>
+</blockquote>
+<p> 首先在master的配置文件中对其分组,推荐写到&#x2F;etc&#x2F;salt&#x2F;master.d&#x2F;中一个独立的配置文件中，比如nodegroup.conf</p>
+<ul>
+<li>G – 针对 Grains 做单个匹配，例如：G@os:Ubuntu</li>
+<li>E – 针对 minion 针对正则表达式做匹配，例如：E@web\d+.(dev|qa|prod).loc</li>
+<li>P – 针对 Grains 做正则表达式匹配，例如：P@os:(RedHat|Fedora|CentOS)</li>
+<li>L – 针对 minion 做列表匹配，例如：<a href="mailto:&#76;&#64;&#x6d;&#105;&#x6e;&#105;&#x6f;&#x6e;&#x31;&#46;&#101;&#120;&#97;&#109;&#x70;&#x6c;&#x65;&#x2e;&#99;&#x6f;&#x6d;">&#76;&#64;&#x6d;&#105;&#x6e;&#105;&#x6f;&#x6e;&#x31;&#46;&#101;&#120;&#97;&#109;&#x70;&#x6c;&#x65;&#x2e;&#99;&#x6f;&#x6d;</a>,minion3.domain.com or bl*.domain.com</li>
+<li>I – 针对 Pillar 做单个匹配，例如：I@pdata:foobar</li>
+<li>S – 针对子网或是 IP 做匹配，例如：<a href="mailto:&#x53;&#x40;&#49;&#57;&#50;&#x2e;&#49;&#x36;&#56;&#46;&#x31;&#x2e;&#x30;">&#x53;&#x40;&#49;&#57;&#50;&#x2e;&#49;&#x36;&#56;&#46;&#x31;&#x2e;&#x30;</a>&#x2F;24 or <a href="mailto:&#x53;&#64;&#49;&#57;&#x32;&#x2e;&#49;&#54;&#56;&#46;&#49;&#x2e;&#49;&#x30;&#x30;">&#x53;&#64;&#49;&#57;&#x32;&#x2e;&#49;&#54;&#56;&#46;&#49;&#x2e;&#49;&#x30;&#x30;</a></li>
+<li>R – 针对客户端范围做匹配，例如： R@%foo.bar</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#写到master中也是这个格式，master.d中*.conf是默认动态加载的</span><br><span class="line">[root@k8s-master01 ~]# cat /etc/salt/master.d/nodegroup.conf </span><br><span class="line">nodegroups:</span><br><span class="line"> test1: &#x27;E@k8s*&#x27;</span><br><span class="line">[root@k8s-master01 ~]# salt -N test1 test.ping  #-N指定groupname</span><br><span class="line">k8s-node01:</span><br><span class="line">    True</span><br></pre></td></tr></table></figure>
+
+<h2 id="模块"><a href="#模块" class="headerlink" title="模块"></a>模块</h2><p><a target="_blank" rel="noopener" href="http://docs.saltstack.cn/ref/modules/all/index.html">官网模块说明</a></p>
+<blockquote>
+<p>salt ‘*’ sys.doc cmd 查看方法</p>
+</blockquote>
+<h4 id="cmd模块"><a href="#cmd模块" class="headerlink" title="cmd模块"></a>cmd模块</h4><blockquote>
+<p>在Million上执行命令或者脚本</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># salt -N test1 cmd.run &#x27;df -h&#x27;</span><br></pre></td></tr></table></figure>
+
+<h4 id="test模块"><a href="#test模块" class="headerlink" title="test模块"></a>test模块</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master01 ~]# salt -N test1 test.ping</span><br><span class="line">k8s-node01:</span><br><span class="line">    True</span><br></pre></td></tr></table></figure>
+
+<h4 id="cp模块"><a href="#cp模块" class="headerlink" title="cp模块"></a>cp模块</h4><blockquote>
+<p>实现远程文件、目录的复制，以及下载URL文件等操作，默认salt的仓库目录在&#x2F;srv&#x2F;salt，如果没有，请创建该目录</p>
+</blockquote>
+<p>开启文件服务器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master01 ~]# egrep -v &#x27;^#|^$&#x27; /etc/salt/master</span><br><span class="line">interface: 192.168.100.100</span><br><span class="line">file_roots:</span><br><span class="line">  base:</span><br><span class="line">    - /srv/salt</span><br><span class="line"></span><br><span class="line">[root@k8s-master01 ~]# systemctl restart salt-master   </span><br></pre></td></tr></table></figure>
+
+<p>测试推送文件和目录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master01 ~]# echo 111 &gt; /srv/salt/test.txt</span><br><span class="line">[root@k8s-master01 ~]# cat /srv/salt/test.txt</span><br><span class="line">111</span><br><span class="line">[root@k8s-master01 ~]# salt -N test1  cp.get_file salt://test.txt /tmp</span><br><span class="line">k8s-node01:</span><br><span class="line">    /tmp/test.txt</span><br><span class="line">[root@k8s-master01 ~]# salt -N test1  cmd.run &#x27;ls -l  /tmp&#x27;</span><br><span class="line">k8s-node01:</span><br><span class="line">    total 8</span><br><span class="line">    -rw-r--r-- 1 root root 530 Jul  5 14:10 nginx.yaml</span><br><span class="line">    -rw-r--r-- 1 root root   4 Jul  5 14:28 test.txt</span><br><span class="line">    drwx------ 2 root root   6 Jun 30 22:12 vmware-root_702-2722304542</span><br><span class="line">    drwx------ 2 root root   6 Jun 30 21:51 vmware-root_705-4256479617</span><br><span class="line">    drwx------ 2 root root   6 Jul  4 19:12 vmware-root_709-4248287236</span><br><span class="line">    drwx------ 2 root root   6 Jun 30 21:48 vmware-root_740-2999460834</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">[root@k8s-master01 ~]# mkdir /srv/salt/sourceFolder</span><br><span class="line">[root@k8s-master01 ~]# echo s1 &gt;/srv/salt/sourceFolder/s1.txt</span><br><span class="line">[root@k8s-master01 ~]# </span><br><span class="line">[root@k8s-master01 ~]# ll /srv/salt/sourceFolder</span><br><span class="line">总用量 4</span><br><span class="line">-rw-r--r-- 1 root root 3 7月   5 14:32 s1.txt</span><br><span class="line">[root@k8s-master01 ~]# salt -N test1  cp.get_dir salt://sourceFolder /tmp</span><br><span class="line">k8s-node01:</span><br><span class="line">    - /tmp/sourceFolder/s1.txt</span><br><span class="line">[root@k8s-master01 ~]# salt -N test1  cmd.run &#x27;ls -l  /tmp&#x27;</span><br><span class="line">k8s-node01:</span><br><span class="line">    total 8</span><br><span class="line">    -rw-r--r-- 1 root root 530 Jul  5 14:10 nginx.yaml</span><br><span class="line">    drwxr-xr-x 2 root root  20 Jul  5 14:32 sourceFolder</span><br><span class="line">    -rw-r--r-- 1 root root   4 Jul  5 14:28 test.txt</span><br><span class="line">    drwx------ 2 root root   6 Jun 30 22:12 vmware-root_702-2722304542</span><br><span class="line">    drwx------ 2 root root   6 Jun 30 21:51 vmware-root_705-4256479617</span><br><span class="line">    drwx------ 2 root root   6 Jul  4 19:12 vmware-root_709-4248287236</span><br><span class="line">    drwx------ 2 root root   6 Jun 30 21:48 vmware-root_740-2999460834</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>下载URL内容到被控主机指定位置(&#x2F;tmp&#x2F;index.html)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">salt &#x27;*&#x27; cp.get_url http://www.slashdot.ort /tmp/index.html</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="file模块"><a href="#file模块" class="headerlink" title="file模块"></a>file模块</h4><blockquote>
+<p>被控主机常见的文件操作，包括文件读写、权限、查找、校验，推送文件</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">salt &#x27;*&#x27; file.copy /path/to/src /path/to/dst</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="cron模块"><a href="#cron模块" class="headerlink" title="cron模块"></a>cron模块</h4>
+<div class="article-footer fs14">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+    <section id="share">
+      <div class="header"><span>分享文章</span></div>
+      <div class="body">
+        <div class="link"><input class="copy-area" readonly="true" id="copy-link" value="http://lqy672.com/2024/12/06/Saltstack%E8%AE%B0%E5%BD%95/" /></div>
+        <div class="social-wrap dis-select"><a class="social share-item wechat" onclick="util.toggle(&quot;qrcode-wechat&quot;)"><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/b32ef3da1162a.svg" /></a><a class="social share-item weibo" target="_blank" rel="external nofollow noopener noreferrer" href="https://service.weibo.com/share/share.php?url=http://lqy672.com/2024/12/06/Saltstack%E8%AE%B0%E5%BD%95/&title= - null&summary=saltstack 自动化运维工具saltstack 官网
+SaltStack采用C&#x2F;S模式，server端就是salt的master，client端就是minion，minion与master之间通过ZeroMQ消息队列通..."><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/80c07e4dbb303.svg" /></a><a class="social share-item email" href="mailto:?subject= - null&amp;body=http://lqy672.com/2024/12/06/Saltstack%E8%AE%B0%E5%BD%95/"><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/a1b00e20f425d.svg" /></a><a class="social share-item link" onclick="util.copy(&quot;copy-link&quot;, &quot;复制成功&quot;)"><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/8411ed322ced6.svg" /></a></div>
+        
+        <div class="qrcode" id="qrcode-wechat" style="opacity:0;height:0">
+          <img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=http://lqy672.com/2024/12/06/Saltstack%E8%AE%B0%E5%BD%95/"/>
+        </div>
+        
+      </div>
+    </section>
+    </div>
+</article>
+
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><center>
+  <span>
+    © 2024
+    <a style="font-weight: bold;  auto;" target="_blank" rel="noopener" href="https://github.com/qyliuqy">Liuqy</a>
+    使用 <a style="font-weight: bold;  auto;" target="_blank" rel="noopener" href="https://github.com/FelicxFoster/hexo-theme-stellar">Stellar</a>
+    创建
+  </span>
+  <br>
+  <!--不蒜子计数器-->
+  <script async="" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <!--添加一个访问量-->
+  <span>总访问 <span id="busuanzi_value_site_pv" style="font-weight: bold;"></span> 次 | 本页访问 <span id="busuanzi_value_page_pv" style="font-weight: bold;"></span> 次</span>
+  </br>
+  <span id="runtime_span"></span>
+
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      var runtime_span = document.getElementById('runtime_span');
+
+      function show_runtime() {
+        setTimeout(show_runtime, 1000);
+
+        var seconds = 1000;
+        var minutes = seconds * 60;
+        var hours = minutes * 60;
+        var days = hours * 24;
+        var years = days * 365;
+
+        var today = new Date();
+        var todayYear = today.getFullYear();
+        var todayMonth = today.getMonth();
+        var todayDate = today.getDate();
+        var todayHour = today.getHours();
+        var todayMinute = today.getMinutes();
+        var todaySecond = today.getSeconds();
+
+        var t1 = Date.UTC(2023, 9, 12, 0, 0, 0); // UTC时间，月份从0开始
+        var t2 = Date.UTC(todayYear, todayMonth, todayDate, todayHour, todayMinute, todaySecond);
+        var diff = t2 - t1;
+
+        var diffYears = Math.floor(diff / years);
+        var diffDays = Math.floor((diff / days) - diffYears * 365);
+        var diffHours = Math.floor((diff - (diffYears * 365 + diffDays) * days) / hours);
+        var diffMinutes = Math.floor((diff - (diffYears * 365 + diffDays) * days - diffHours * hours) / minutes);
+        var diffSeconds = Math.floor((diff - (diffYears * 365 + diffDays) * days - diffHours * hours - diffMinutes * minutes) / seconds);
+
+        runtime_span.innerHTML = "🦉营业：" + diffYears + " 年 " + diffDays + " 天 " + diffHours + " 小时 " + diffMinutes + " 分钟 " + diffSeconds + " 秒🦉";
+      }
+
+      show_runtime(); // 初次调用函数以启动定时器
+    });
+  </script>
+</center>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#saltstack-%E8%87%AA%E5%8A%A8%E5%8C%96%E8%BF%90%E7%BB%B4%E5%B7%A5%E5%85%B7"><span class="toc-text">saltstack 自动化运维工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SaltStack%E7%BB%84%E4%BB%B6%E4%BB%8B%E7%BB%8D"><span class="toc-text">SaltStack组件介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SaltStack%E9%83%A8%E7%BD%B2"><span class="toc-text">SaltStack部署</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#salt%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="toc-text">salt常用命令</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#salt%E4%B8%BB%E6%9C%BA%E5%88%86%E7%BB%84%E7%AE%A1%E7%90%86"><span class="toc-text">salt主机分组管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A8%A1%E5%9D%97"><span class="toc-text">模块</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#cmd%E6%A8%A1%E5%9D%97"><span class="toc-text">cmd模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#test%E6%A8%A1%E5%9D%97"><span class="toc-text">test模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#cp%E6%A8%A1%E5%9D%97"><span class="toc-text">cp模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#file%E6%A8%A1%E5%9D%97"><span class="toc-text">file模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#cron%E6%A8%A1%E5%9D%97"><span class="toc-text">cron模块</span></a></li></ol></li></ol></li></ol></div><div class="widget-footer">
+
+<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel blur'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+<script type="text/javascript">
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+  };
+  const deps = {
+    jquery: `https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js`,
+    marked: `https://cdn.jsdelivr.net/npm/marked@13.0.1/lib/marked.umd.min.js`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+    
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      let retryTimes = 3;
+      utils.onLoading(el);
+      function req() {
+        return new Promise((resolve, reject) => {
+          let status = 0; // 0 等待 1 完成 2 超时
+          let timer = setTimeout(() => {
+            if (status === 0) {
+              status = 2;
+              timer = null;
+              reject('请求超时');
+              if (retryTimes == 0) {
+                onFailure();
+              }
+            }
+          }, 5000);
+          fetch(url).then(function(response) {
+            if (status !== 2) {
+              clearTimeout(timer);
+              resolve(response);
+              timer = null;
+              status = 1;
+            }
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok.');
+          }).then(function(data) {
+            retryTimes = 0;
+            utils.onLoadSuccess(el);
+            callback(data);
+          }).catch(function(error) {
+            if (retryTimes > 0) {
+              retryTimes -= 1;
+              setTimeout(() => {
+                req();
+              }, 5000);
+            } else {
+              utils.onLoadFailure(el);
+              onFailure();
+            }
+          });
+        });
+      }
+      req();
+    },
+  };
+</script>
+
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+
+<!-- required -->
+<script src="/js/main.js?v=1.29.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', theme)
+    }
+
+    applyThemeToGiscus(theme)
+  }
+
+  const applyThemeToGiscus = (theme) => {
+    theme = theme === 'auto' ? 'preferred_color_scheme' : theme
+
+    const cmt = document.getElementById('giscus')
+    if (cmt) {
+      // This works before giscus load.
+      cmt.setAttribute('data-theme', theme)
+    }
+
+    const iframe = document.querySelector('#comments > section.giscus > iframe')
+    if (iframe) {
+      // This works after giscus loaded.
+      const src = iframe.src
+      const newSrc = src.replace(/theme=[\w]+/, `theme=${theme}`)
+      iframe.src = newSrc
+    }
+  }
+
+  const switchTheme = () => {
+    // light -> dark -> auto -> light -> ...
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    switch (currentTheme) {
+      case 'light':
+        newTheme = 'dark'
+        break
+      case 'dark':
+        newTheme = 'auto'
+        break
+      default:
+        newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+      auto: `切换到跟随系统配色`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    // Apply user's preferred theme, if any.
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    }
+  })()
+</script>
+
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@19.1.3/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+</script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error)';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const els = document.getElementsByClassName('ds-memos');
+    if (els != undefined && els.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `已复制`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+</div></body></html>
